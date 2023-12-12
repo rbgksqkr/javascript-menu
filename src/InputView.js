@@ -13,6 +13,10 @@ const InputView = {
         }
         return coach;
       });
+
+      if (coaches.length < 2 || coaches.length > 5) {
+        throw '[ERROR] 코치는 최소 2명, 최대 5명입니다.';
+      }
       return coaches;
     } catch (error) {
       MissionUtils.Console.print(error);
