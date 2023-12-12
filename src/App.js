@@ -2,6 +2,7 @@ const MissionUtils = require('@woowacourse/mission-utils');
 const Coach = require('./Coach.js');
 const InputView = require('./InputView.js');
 const OutputView = require('./OutputView.js');
+const Validator = require('./Validator.js');
 
 const SAMPLE = {
   일식: '규동, 우동, 미소시루, 스시, 가츠동, 오니기리, 하이라이스, 라멘, 오코노미야끼',
@@ -52,9 +53,10 @@ class App {
   getRandomCategory(selectedCategory) {
     try {
       const category = MissionUtils.Random.pickNumberInRange(1, 5); // 카테고리를 랜덤으로 골라
-      if (selectedCategory.includes(category)) {
-        throw '[ERROR] 한 주에 같은 카테고리는 최대 2회까지만 고를 수 있습니다.';
-      }
+      const categoryCount = selectedCategory.filter(
+        (selected) => this.getCategoryName(category) === selected
+      ).length;
+      Validator.isValidCategory(categoryCount);
       return category;
     } catch (error) {
       MissionUtils.Console.print(error);
@@ -63,24 +65,23 @@ class App {
   }
 
   getCategoryName(categoryNumber) {
-    return SAMPLE[sampleCategory[categoryNumber]];
+    return sampleCategory[categoryNumber];
+  }
+
+  getCategoryMenu(categoryNumber) {
+    return SAMPLE[this.getCategoryName(categoryNumber)];
   }
 
   recommendMenu(coach, categoryNumber) {
     try {
-      const stringMenu = this.getCategoryName(categoryNumber); // 무작위 카테고리에 맞는 메뉴들의 string 받기
+      const stringMenu = this.getCategoryMenu(categoryNumber); // 무작위 카테고리에 맞는 메뉴들의 string 받기
       const menus = stringMenu.split(',').map((menu) => menu.trim());
       const menuNumber = MissionUtils.Random.shuffle(
         Array.from({ length: menus.length }, (v, i) => i)
       )[0];
       const selectedMenu = menus[menuNumber];
-      if (coach.notEatMenus.includes(selectedMenu)) {
-        throw '[ERROR] 못먹는 음식입니다. 다시 추천해주세요.';
-      }
-
-      if (coach.eatMenus.includes(selectedMenu)) {
-        throw '[ERROR] 이미 추천한 음식입니다. 다시 추천해주세요.';
-      }
+      Validator.isValidMenu(coach, selectedMenu);
+      Validator.isRecommendedMenu(coach, selectedMenu);
       return selectedMenu;
     } catch (error) {
       MissionUtils.Console.print(error);
