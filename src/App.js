@@ -1,6 +1,6 @@
 const MissionUtils = require('@woowacourse/mission-utils');
 const InputView = require('./InputView.js');
-console.log(MissionUtils.Random.pickNumberInList([1, 2, 3]));
+const OutputView = require('./OutputView.js');
 
 const SAMPLE = {
   일식: '규동, 우동, 미소시루, 스시, 가츠동, 오니기리, 하이라이스, 라멘, 오코노미야끼',
@@ -10,20 +10,30 @@ const SAMPLE = {
   양식: '라자냐, 그라탱, 뇨끼, 끼슈, 프렌치 토스트, 바게트, 스파게티, 피자, 파니니',
 };
 
+const sampleCategory = { 1: '일식', 2: '한식', 3: '중식', 4: '아시안', 5: '양식' };
+
 class App {
   async play() {
-    MissionUtils.Console.print('점심 메뉴 추천을 시작합니다.\n');
+    OutputView.printStartRecommend();
     const result = await InputView.readCoach();
-    // result.map(async (coach) => {
-    //   await InputView.readCannotEat(coach);
-    // });
-
     for (let i = 0; i < result.length; i++) {
       await InputView.readCannotEat(result[i]);
     }
-    // console.log(result);
-    MissionUtils.Console.print('메뉴 추천 결과입니다.\n');
-    MissionUtils.Console.print('추천을 완료했습니다.\n');
+
+    const categoryNumber = MissionUtils.Random.pickNumberInRange(1, 5); // 카테고리를 랜덤으로 골라
+    const stringMenu = SAMPLE[sampleCategory[categoryNumber]]; // 무작위 카테고리에 맞는 메뉴들의 string 받기
+    const menus = stringMenu.split(',');
+    console.log(`menus : ${menus}`);
+
+    const menuNumber = MissionUtils.Random.shuffle(
+      Array.from({ length: menus.length }, (v, i) => i + 1)
+    )[0];
+    // TODO: 추천할 수 없는 메뉴인 경우 다시 섞은 후 첫 번째 값을 사용해야 한다.
+    // TODO: 추천할 수 없는 지 체크하는 메소드 구현
+
+    console.log(`menu : ${menus[menuNumber]}`);
+
+    OutputView.printRecommendResult();
   }
 }
 
