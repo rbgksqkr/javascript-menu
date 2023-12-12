@@ -17,18 +17,26 @@ const WEEKDAY = 5;
 class App {
   async play() {
     OutputView.printStartRecommend();
+    const coachList = await InputView.readCoach();
+    const coaches = await this.getCoaches(coachList);
+    const selectedCategory = this.getSelectedCategory(coaches);
+    OutputView.printRecommendResult(coaches, selectedCategory);
+  }
 
-    const result = await InputView.readCoach();
+  async getCoaches(coachList) {
     const coaches = [];
-    for (let i = 0; i < result.length; i++) {
-      const coach = new Coach(result[i]);
-      const notEatMenus = await InputView.readCannotEat(result[i]);
+    for (let i = 0; i < coachList.length; i++) {
+      const coach = new Coach(coachList[i]);
+      const notEatMenus = await InputView.readCannotEat(coachList[i]);
       notEatMenus.forEach((menu) => {
         coach.addNotEatMenu(menu);
       });
       coaches.push(coach);
     }
+    return coaches;
+  }
 
+  getSelectedCategory(coaches) {
     const selectedCategory = [];
     for (let i = 0; i < WEEKDAY; i++) {
       const category = this.getRandomCategory(selectedCategory);
@@ -38,8 +46,7 @@ class App {
         coaches[j].addEatMenu(menu);
       }
     }
-
-    OutputView.printRecommendResult(coaches, selectedCategory);
+    return selectedCategory;
   }
 
   getRandomCategory(selectedCategory) {
@@ -76,7 +83,7 @@ class App {
       }
       return selectedMenu;
     } catch (error) {
-      console.log(error);
+      MissionUtils.Console.print(error);
       return this.recommendMenu(coach, categoryNumber);
     }
   }
