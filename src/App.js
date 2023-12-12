@@ -1,4 +1,5 @@
 const MissionUtils = require('@woowacourse/mission-utils');
+const Coach = require('./Coach.js');
 const InputView = require('./InputView.js');
 const OutputView = require('./OutputView.js');
 
@@ -11,29 +12,51 @@ const SAMPLE = {
 };
 
 const sampleCategory = { 1: '일식', 2: '한식', 3: '중식', 4: '아시안', 5: '양식' };
+const WEEKDAY = 5;
 
 class App {
   async play() {
     OutputView.printStartRecommend();
     const result = await InputView.readCoach();
+    const coaches = [];
     for (let i = 0; i < result.length; i++) {
-      await InputView.readCannotEat(result[i]);
+      const coach = new Coach(result[i]);
+      const notEatMenus = await InputView.readCannotEat(result[i]);
+      notEatMenus.forEach((menu) => {
+        coach.addNotEatMenu(menu);
+      });
+      coaches.push(coach);
     }
 
-    const categoryNumber = MissionUtils.Random.pickNumberInRange(1, 5); // 카테고리를 랜덤으로 골라
-    const stringMenu = SAMPLE[sampleCategory[categoryNumber]]; // 무작위 카테고리에 맞는 메뉴들의 string 받기
-    const menus = stringMenu.split(',');
-    console.log(`menus : ${menus}`);
+    const selectedCategory = [];
+    for (let i = 0; i < WEEKDAY; i++) {
+      const category = this.getRandomCategory();
+      selectedCategory.push(sampleCategory[category]);
+      for (let j = 0; j < coaches.length; j++) {
+        const menu = this.recommendMenu(category);
+        coaches[j].addEatMenu(menu);
+      }
+    }
+
+    OutputView.printRecommendResult(coaches, selectedCategory);
+  }
+
+  getRandomCategory() {
+    return MissionUtils.Random.pickNumberInRange(1, 5); // 카테고리를 랜덤으로 골라
+  }
+
+  getCategoryName(categoryNumber) {
+    return SAMPLE[sampleCategory[categoryNumber]];
+  }
+
+  recommendMenu(categoryNumber) {
+    const stringMenu = this.getCategoryName(categoryNumber); // 무작위 카테고리에 맞는 메뉴들의 string 받기
+    const menus = stringMenu.split(',').map((menu) => menu.trim());
 
     const menuNumber = MissionUtils.Random.shuffle(
-      Array.from({ length: menus.length }, (v, i) => i + 1)
+      Array.from({ length: menus.length }, (v, i) => i)
     )[0];
-    // TODO: 추천할 수 없는 메뉴인 경우 다시 섞은 후 첫 번째 값을 사용해야 한다.
-    // TODO: 추천할 수 없는 지 체크하는 메소드 구현
-
-    console.log(`menu : ${menus[menuNumber]}`);
-
-    OutputView.printRecommendResult();
+    return menus[menuNumber];
   }
 }
 
