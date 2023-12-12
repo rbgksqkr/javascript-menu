@@ -25,11 +25,19 @@ const InputView = {
   },
 
   async readCannotEat(coach) {
-    const data = await MissionUtils.Console.readLineAsync(
-      `\n${coach}(이)가 못 먹는 메뉴를 입력해 주세요.\n`
-    );
-    const notEatMenus = data.split(',');
-    return notEatMenus;
+    try {
+      const data = await MissionUtils.Console.readLineAsync(
+        `\n${coach}(이)가 못 먹는 메뉴를 입력해 주세요.\n`
+      );
+      const notEatMenus = data.split(',');
+      if (notEatMenus.length > 2) {
+        throw '[ERROR] 못먹는 음식은 최대 2개입니다.';
+      }
+      return notEatMenus;
+    } catch (error) {
+      MissionUtils.Console.print(error);
+      return this.readCannotEat(coach);
+    }
   },
 };
 

@@ -17,6 +17,7 @@ const WEEKDAY = 5;
 class App {
   async play() {
     OutputView.printStartRecommend();
+
     const result = await InputView.readCoach();
     const coaches = [];
     for (let i = 0; i < result.length; i++) {
@@ -30,10 +31,10 @@ class App {
 
     const selectedCategory = [];
     for (let i = 0; i < WEEKDAY; i++) {
-      const category = this.getRandomCategory();
+      const category = this.getRandomCategory(selectedCategory);
       selectedCategory.push(sampleCategory[category]);
       for (let j = 0; j < coaches.length; j++) {
-        const menu = this.recommendMenu(category);
+        const menu = this.recommendMenu(coaches[j], category);
         coaches[j].addEatMenu(menu);
       }
     }
@@ -41,22 +42,43 @@ class App {
     OutputView.printRecommendResult(coaches, selectedCategory);
   }
 
-  getRandomCategory() {
-    return MissionUtils.Random.pickNumberInRange(1, 5); // 카테고리를 랜덤으로 골라
+  getRandomCategory(selectedCategory) {
+    try {
+      const category = MissionUtils.Random.pickNumberInRange(1, 5); // 카테고리를 랜덤으로 골라
+      if (selectedCategory.includes(category)) {
+        throw '[ERROR] 한 주에 같은 카테고리는 최대 2회까지만 고를 수 있습니다.';
+      }
+      return category;
+    } catch (error) {
+      MissionUtils.Console.print(error);
+      return this.getRandomCategory(selectedCategory);
+    }
   }
 
   getCategoryName(categoryNumber) {
     return SAMPLE[sampleCategory[categoryNumber]];
   }
 
-  recommendMenu(categoryNumber) {
-    const stringMenu = this.getCategoryName(categoryNumber); // 무작위 카테고리에 맞는 메뉴들의 string 받기
-    const menus = stringMenu.split(',').map((menu) => menu.trim());
+  recommendMenu(coach, categoryNumber) {
+    try {
+      const stringMenu = this.getCategoryName(categoryNumber); // 무작위 카테고리에 맞는 메뉴들의 string 받기
+      const menus = stringMenu.split(',').map((menu) => menu.trim());
+      const menuNumber = MissionUtils.Random.shuffle(
+        Array.from({ length: menus.length }, (v, i) => i)
+      )[0];
+      const selectedMenu = menus[menuNumber];
+      if (coach.notEatMenus.includes(selectedMenu)) {
+        throw '[ERROR] 못먹는 음식입니다. 다시 추천해주세요.';
+      }
 
-    const menuNumber = MissionUtils.Random.shuffle(
-      Array.from({ length: menus.length }, (v, i) => i)
-    )[0];
-    return menus[menuNumber];
+      if (coach.eatMenus.includes(selectedMenu)) {
+        throw '[ERROR] 이미 추천한 음식입니다. 다시 추천해주세요.';
+      }
+      return selectedMenu;
+    } catch (error) {
+      console.log(error);
+      return this.recommendMenu(coach, categoryNumber);
+    }
   }
 }
 

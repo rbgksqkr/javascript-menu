@@ -2,7 +2,7 @@ class Coach {
   name = '';
   notEatMenus = [];
   eatMenus = [];
-  recommendMenus = [];
+  recommendedMenus = [];
 
   constructor(name) {
     this.name = name;
@@ -13,7 +13,7 @@ class Coach {
   }
 
   addRecommendMenu(menu) {
-    this.recommendMenus.push(menu);
+    this.recommendedMenus.push(menu);
   }
 
   addEatMenu(menu) {
