@@ -1,4 +1,5 @@
 const MissionUtils = require('@woowacourse/mission-utils');
+const Validator = require('./Validator');
 
 const InputView = {
   async readCoach() {
@@ -6,17 +7,11 @@ const InputView = {
       const data = await MissionUtils.Console.readLineAsync(
         '코치의 이름을 입력해 주세요. (, 로 구분)\n'
       );
-
       const coaches = data.split(',').map((coach) => {
-        if (coach.length < 2 || coach.length > 4) {
-          throw '[ERROR] 코치의 이름은 최소 2글자, 최대 4글자입니다.';
-        }
+        Validator.isValidCoachNameLength(coach.length);
         return coach;
       });
-
-      if (coaches.length < 2 || coaches.length > 5) {
-        throw '[ERROR] 코치는 최소 2명, 최대 5명입니다.';
-      }
+      Validator.isValidCoachLength(coaches.length);
       return coaches;
     } catch (error) {
       MissionUtils.Console.print(error);
@@ -30,9 +25,7 @@ const InputView = {
         `\n${coach}(이)가 못 먹는 메뉴를 입력해 주세요.\n`
       );
       const notEatMenus = data.split(',');
-      if (notEatMenus.length > 2) {
-        throw '[ERROR] 못먹는 음식은 최대 2개입니다.';
-      }
+      Validator.isValidNotEatMenuLength(notEatMenus.length);
       return notEatMenus;
     } catch (error) {
       MissionUtils.Console.print(error);
