@@ -20,8 +20,8 @@ class App {
     OutputView.printStartRecommend();
     const coachList = await InputView.readCoach();
     const coaches = await this.getCoaches(coachList);
-    const selectedCategory = this.getSelectedCategory(coaches);
-    OutputView.printRecommendResult(coaches, selectedCategory);
+    const selectedMenus = this.getSelectedMenus(coaches);
+    OutputView.printRecommendResult(coaches, selectedMenus);
   }
 
   async getCoaches(coachList) {
@@ -37,17 +37,21 @@ class App {
     return coaches;
   }
 
-  getSelectedCategory(coaches) {
+  getSelectedMenus(coaches) {
     const selectedCategory = [];
     for (let i = 0; i < WEEKDAY; i++) {
       const category = this.getRandomCategory(selectedCategory);
       selectedCategory.push(sampleCategory[category]);
-      for (let j = 0; j < coaches.length; j++) {
-        const menu = this.recommendMenu(coaches[j], category);
-        coaches[j].addEatMenu(menu);
-      }
+      this.addCoachEatMenu(coaches, category);
     }
     return selectedCategory;
+  }
+
+  addCoachEatMenu(coaches, category) {
+    for (let i = 0; i < coaches.length; i++) {
+      const menu = this.recommendMenu(coaches[i], category);
+      coaches[i].addEatMenu(menu);
+    }
   }
 
   getRandomCategory(selectedCategory) {
