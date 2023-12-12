@@ -6,7 +6,7 @@ const OutputView = {
   },
 
   async printRecommendResult(coaches, selectedCategory) {
-    MissionUtils.Console.print('메뉴 추천 결과입니다.');
+    MissionUtils.Console.print('\n메뉴 추천 결과입니다.');
     MissionUtils.Console.print(
       // `[ ${['구분', '월요일', '화요일', '수요일', '목요일', '금요일'].join(' | ')} ]`
       '[ 구분 | 월요일 | 화요일 | 수요일 | 목요일 | 금요일 ]'
